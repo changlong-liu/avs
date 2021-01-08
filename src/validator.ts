@@ -14,7 +14,7 @@ import express = require('express');
 import { Response } from "oauth2-server";
 var app = express();
 
-const specRepoDir = path.resolve("..\\azure-rest-api-specs")
+const specRepoDir = path.resolve("../azure-rest-api-specs")
 app.all('', (req, res) => {
     let liveRequest = {
         url: "https://xxx.com/providers/someprovider?api-version=2018-01-01",
