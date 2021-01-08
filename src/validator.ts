@@ -183,7 +183,8 @@ import { MockerCache, PayloadCache } from "oav/dist/lib/generator/exampleCache";
 
 let jsonLoader = JsonLoader.create({});
 let mockerCache = new MockerCache();
-let swaggerMocker = new SwaggerMocker(jsonLoader, mockerCache);
+let payloadCache = new PayloadCache();
+let swaggerMocker = new SwaggerMocker(jsonLoader, mockerCache, payloadCache);
 
 function getSpecItem(spec: any, operationId: string): any {
   const paths = spec.paths;
