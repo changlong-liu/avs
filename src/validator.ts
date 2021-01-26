@@ -105,11 +105,26 @@ export async function validateRequest(req: any, res: any): Promise<void> {
       if (validateResult.isSuccessful) {
         let ret = findResponse(example.responses, 200).body;
         ret = lodash.omit(ret,'nextLink')
+        ret = replacePropertyValue("provisioningState", "Succeeded", ret)
         res.status(200).json(ret);
       }
       else {
         res.status(404).json(validateResult.errors[0]);
       }
+}
+
+function replacePropertyValue(property: string, newVal: any, object: any) {
+  const newObject = lodash.clone(object);
+
+  lodash.each(object, (val, key) => {
+    if (key === property) {
+      newObject[key] = newVal;
+    } else if (typeof(val) === 'object') {
+      newObject[key] = replacePropertyValue(property, newVal, val);
+    }
+  });
+
+  return newObject;
 }
 
 import * as fs from "fs";

@@ -19,6 +19,10 @@ function main() {
     httpsServer.listen(443, '0.0.0.0', function () {
         console.log("Listening https on port: 443")
     });
+    let httpServer = getHttpServer(app);
+    httpServer.listen(80, '0.0.0.0', function () {
+      console.log("Listening https on port: 80")
+  });
 }
 
 main();
