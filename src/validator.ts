@@ -4,30 +4,14 @@ import * as globby from "globby";
 import * as lodash from "lodash";
 import { ResponsesObject } from "yasway";
 import { LiveValidator, LiveValidationResult } from "oav/dist/lib/liveValidation/liveValidator";
-import { LiveRequest, LiveResponse } from "oav/dist/lib/liveValidation/operationValidator"
+import { LiveRequest, LiveResponse, ValidationRequest } from "oav/dist/lib/liveValidation/operationValidator"
 import { OperationSearcher } from "oav/lib/liveValidation/operationSearcher";
 import * as Constants from "oav/dist/lib/util/constants";
 import http = require('http')
 import { createErrorBody, ERR_NOT_FOUND } from './errors';
-
-
 import express = require('express');
-import { Response } from "oauth2-server";
-var app = express();
 
 const specRepoDir = path.resolve("../azure-rest-api-specs")
-app.all('', (req, res) => {
-  let liveRequest = {
-    url: "https://xxx.com/providers/someprovider?api-version=2018-01-01",
-    method: "get",
-    headers: {
-      "content-type": "application/json",
-    },
-    query: {
-      "api-version": "2016-01-01",
-    },
-  }
-})
 const options = {
   swaggerPaths: [],
   excludedSwaggerPathsPattern: Constants.DefaultConfig.ExcludedSwaggerPathsPattern,
@@ -56,7 +40,6 @@ function findResponse(responses: Record<string, any>, status: number) {
 }
 
 export async function validateRequest(req: express.Request, res: express.Response): Promise<void> {
-
   var fullUrl = req.protocol + '://' + req.get('host') + req.originalUrl;
   const reqBody = req.read()
   let liveRequest = {
@@ -72,47 +55,58 @@ export async function validateRequest(req: express.Request, res: express.Respons
     liveRequest.method,
     ''
   );
-  if (validationRequest.providerNamespace == "microsoft.unknown" && req.originalUrl.split("/").length == 5) {
-    res.status(200).json(
-      {
-        "id": "/subscriptions/7fd08dcc-a653-4b0f-8f8c-4dac889fdda4/resourceGroups/test-changlong",
-        "location": "eastus",
-        "managedBy": null,
-        "name": "test-changlong",
-        "properties": {
-          "provisioningState": "Succeeded"
-        },
-        "tags": {},
-        "type": "Microsoft.Resources/resourceGroups"
-      }
-    );
-    return;
-  }
-  const result = validator.operationSearcher.search(validationRequest);
-  // console.log("operation: ", result);
-  const operationId = result.operationMatch.operation.operationId as string;
-  const specItem = {
-    content: result.operationMatch.operation
-  }
-  let generator = new ExampleGenerator(
-    specRepoDir//,
-    //path.resolve(payloadDir, rp + apiVersion)
-  );
-  let example = await generate(generator, specItem, operationId);
-
-
   let validateResult = await validator.validateLiveRequest(liveRequest);
 
   if (validateResult.isSuccessful) {
+    const result = validator.operationSearcher.search(validationRequest);
+    // console.log("operation: ", result);
+    const operationId = result.operationMatch.operation.operationId as string;
+    const specItem = {
+      content: result.operationMatch.operation
+    }
+    let generator = new ExampleGenerator(
+      specRepoDir//,
+      //path.resolve(payloadDir, rp + apiVersion)
+    );
+    let example = await generate(generator, specItem, operationId);  
     genStatefulResponse(req, res, example.responses);
   }
   else {
-    res.status(404).json(validateResult.errors[0]);
+    const exampleResponse = handleSpecials(req, res, validationRequest);
+    if (isNullOrUndefined(exampleResponse)) {
+      res.status(404).json(validateResult.errors[0]);
+    }
+    else {
+      genStatefulResponse(req, res, exampleResponse);
+    }
   }
 }
 
+export function handleSpecials(req: express.Request, res: express.Response, validationRequest: ValidationRequest): Record<string, any> |undefined {
+  if (validationRequest.providerNamespace == "microsoft.unknown") {
+    const path = getPath(getPureUrl(req.url));
+    if (path.length==4 && path[2].toLowerCase()=='resourcegroups') {
+      // handle "/subscriptions/xxx/resourceGroups/xxx"
+      return {
+        "200": {
+          "id": getPureUrl(req.url),
+          "location": "eastus",
+          "managedBy": null,
+          "name": path[3],
+          "properties": {
+            "provisioningState": "Succeeded"
+          },
+          "tags": {},
+          "type": "Microsoft.Resources/resourceGroups"
+        }
+      };
+    }
+  }
+  return undefined;
+}
+
 export function genStatefulResponse(req: express.Request, res: express.Response, exampleResponses: Record<string, any>) {
-  if (req.method == 'GET' && !resourcePool.hasUrl(req)) {
+  if (req.method == 'GET' && !ResourcePool.isListUrl(req) && !resourcePool.hasUrl(req)) {
     res.status(404).json(createErrorBody(ERR_NOT_FOUND));
   }
   else {
@@ -122,6 +116,14 @@ export function genStatefulResponse(req: express.Request, res: express.Response,
     ret = replacePropertyValue("provisioningState", "Succeeded", ret)
     res.status(200).json(ret);
   }
+}
+
+export function getPureUrl(url: string) {
+  return url?.split('?')[0];
+}
+
+export function getPath(pureUrl: string) {
+  return pureUrl.split('/').slice(1);
 }
 
 class ResourceNode {
@@ -137,8 +139,8 @@ class ResourcePool {
   }
 
   public updateResourcePool(req: express.Request) {
-    const url = req.url?.split('?')[0];
-    const path = url.split('/').slice(1);
+    const url = getPureUrl(req.url);
+    const path = getPath(url);
     if (req.method == 'PUT') {
       ResourcePool.addResource(this.resourceRoot, path, req.url, path[path.length - 1], req.body)
     }
@@ -162,8 +164,13 @@ class ResourcePool {
   }
 
   public hasUrl(req: express.Request): boolean {
-    const url: string = req.url?.split('?')[0] as string;
-    return !isNullOrUndefined(ResourcePool.getResource(this.resourceRoot, url.split('/').slice(1)));
+    const url: string = getPureUrl(req.url) as string;
+    return !isNullOrUndefined(ResourcePool.getResource(this.resourceRoot, getPath(url)));
+  }
+
+  public static isListUrl(req: express.Request): boolean {
+    const url: string = getPureUrl(req.url) as string;
+    return url.split('/').slice(1).length%2==1;
   }
 
   public static getResource(node: ResourceNode, path: string[]): ResourceNode|undefined {
