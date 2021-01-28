@@ -8,7 +8,7 @@ import { LiveRequest, LiveResponse, ValidationRequest } from "oav/dist/lib/liveV
 import { OperationSearcher } from "oav/lib/liveValidation/operationSearcher";
 import * as Constants from "oav/dist/lib/util/constants";
 import http = require('http')
-import { createErrorBody, ERR_NOT_FOUND } from './errors';
+import { createErrorBody, ERR_NOT_FOUND, STATUS_CODE_200, STATUS_CODE_404, STATUS_CODE_500 } from './errors';
 import express = require('express');
 
 const specRepoDir = path.resolve("../azure-rest-api-specs")
@@ -39,9 +39,8 @@ function findResponse(responses: Record<string, any>, status: number) {
   return nearest ? responses[nearest.toString()] : {};
 }
 
-export async function validateRequest(req: express.Request, res: express.Response): Promise<void> {
+export async function validateRequest(req: express.Request, res: express.Response, profile: Record<string, any>): Promise<void> {
   var fullUrl = req.protocol + '://' + req.get('host') + req.originalUrl;
-  const reqBody = req.read()
   let liveRequest = {
     url: fullUrl,
     method: req.method,
@@ -69,15 +68,20 @@ export async function validateRequest(req: express.Request, res: express.Respons
       //path.resolve(payloadDir, rp + apiVersion)
     );
     let example = await generate(generator, specItem, operationId);  
-    genStatefulResponse(req, res, example.responses);
+    genStatefulResponse(req, res, example.responses, profile);
   }
   else {
     const exampleResponse = handleSpecials(req, res, validationRequest);
-    if (isNullOrUndefined(exampleResponse)) {
-      res.status(404).json(validateResult.errors[0]);
+    if (exampleResponse==undefined) {
+      if ((validateResult.errors?.length || 0)>0) {
+        res.status(STATUS_CODE_404).json(createErrorBody(STATUS_CODE_404, JSON.stringify(validateResult.errors)));
+      }
+      else {
+        res.status(STATUS_CODE_404).json(validateResult.runtimeException);
+      }
     }
     else {
-      genStatefulResponse(req, res, exampleResponse);
+      genStatefulResponse(req, res, exampleResponse, profile);
     }
   }
 }
@@ -89,15 +93,17 @@ export function handleSpecials(req: express.Request, res: express.Response, vali
       // handle "/subscriptions/xxx/resourceGroups/xxx"
       return {
         "200": {
-          "id": getPureUrl(req.url),
-          "location": "eastus",
-          "managedBy": null,
-          "name": path[3],
-          "properties": {
-            "provisioningState": "Succeeded"
-          },
-          "tags": {},
-          "type": "Microsoft.Resources/resourceGroups"
+          "body": {
+            "id": getPureUrl(req.url),
+            "location": "eastus",
+            "managedBy": null,
+            "name": path[3],
+            "properties": {
+              "provisioningState": "Succeeded"
+            },
+            "tags": {},
+            "type": "Microsoft.Resources/resourceGroups"
+          }
         }
       };
     }
@@ -105,15 +111,24 @@ export function handleSpecials(req: express.Request, res: express.Response, vali
   return undefined;
 }
 
-export function genStatefulResponse(req: express.Request, res: express.Response, exampleResponses: Record<string, any>) {
-  if (req.method == 'GET' && !ResourcePool.isListUrl(req) && !resourcePool.hasUrl(req)) {
-    res.status(404).json(createErrorBody(ERR_NOT_FOUND));
+export function genStatefulResponse(req: express.Request, res: express.Response, exampleResponses: Record<string, any>, profile: Record<string, any>) {
+  if (profile?.stateful && ['GET', 'DELETE'].indexOf(req.method.toUpperCase())>=0 && !ResourcePool.isListUrl(req) && !resourcePool.hasUrl(req)) {
+    res.status(STATUS_CODE_404).json(createErrorBody(STATUS_CODE_404, ERR_NOT_FOUND));
   }
   else {
     resourcePool.updateResourcePool(req);
     let ret = findResponse(exampleResponses, 200).body;
-    ret = lodash.omit(ret, 'nextLink')
-    ret = replacePropertyValue("provisioningState", "Succeeded", ret)
+
+    // simplified LRO
+    ret = lodash.omit(ret, 'nextLink');
+    ret = replacePropertyValue("provisioningState", "Succeeded", ret);
+
+    //set name
+    const path =getPath(getPureUrl(req.url));
+    ret = replacePropertyValue("name", path[path.length-1], ret, (v) =>{
+      return typeof v ==='string';
+    });
+    
     res.status(200).json(ret);
   }
 }
@@ -196,11 +211,11 @@ class ResourcePool {
 
 let resourcePool = new ResourcePool();
 
-function replacePropertyValue(property: string, newVal: any, object: any) {
+function replacePropertyValue(property: string, newVal: any, object: any, where=(v: any) => {return true;}) {
   const newObject = lodash.clone(object);
 
   lodash.each(object, (val, key) => {
-    if (key === property) {
+    if (key === property && where(val)) {
       newObject[key] = newVal;
     } else if (typeof (val) === 'object') {
       newObject[key] = replacePropertyValue(property, newVal, val);
@@ -216,7 +231,7 @@ import { JsonLoader } from "oav/dist/lib/swagger/jsonLoader";
 import { Operation, SwaggerSpec } from "oav/dist/lib/swagger/swaggerTypes";
 import SwaggerMocker from "oav/dist/lib/generator/swaggerMocker";
 import { MockerCache, PayloadCache } from "oav/dist/lib/generator/exampleCache";
-import { isNullOrUndefined } from "util";
+import { isNullOrUndefined } from "./utils";
 
 let jsonLoader = JsonLoader.create({});
 let mockerCache = new MockerCache();
