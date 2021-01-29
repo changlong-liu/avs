@@ -27,5 +27,7 @@ After the virtual service is started in local computer, below section describe h
 # // try any az commands here
 ```
 
-## What's next
-+ create response by request
+## What's Next
++ mock response through example files
++ mock response by request
++ reported github issues.
