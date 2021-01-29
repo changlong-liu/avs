@@ -1,17 +1,12 @@
 {
   "name": "virtualservice",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "Virtual Azure Restful Service",
   "main": "index.js",
   "scripts": {
     "debug": "tsc && node --max_old_space_size=4096 --inspect-brk ./dist/main.js",
-    "debug-oauth": "tsc && node --max_old_space_size=4096 --inspect-brk ./dist/mockOAuth2Server.js",
-    "debug-readme": "tsc && node --max_old_space_size=4096 --inspect-brk dist/readmeTool.js",
     "start": "tsc && node dist/main.js",
-    "start-oauth": "tsc && node dist/mockOAuth2Server.js",
-    "start-readme": "tsc && node dist/readmeTool.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "startOAuth": "tsc && node dist/mockOAuth.js"
   },
   "author": "",
   "license": "ISC",
