@@ -1,12 +1,7 @@
 import * as express from "express";
 import { validateRequest } from "../mid/cordinator";
 import { isNullOrUndefined } from "../common/utils"
-
-let profiles: Record<string, any> = {
-    "443": {
-        stateful: true,
-    }
-}
+import { profiles } from "../common/config"
 
 function getProfileByHost(host: string): Record<string, any> {
     if (isNullOrUndefined(host)) return {};

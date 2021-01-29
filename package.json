@@ -16,15 +16,17 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "config": "^3.3.3",
     "lodash": "^4.17.15",
     "oauth2-mock-server": "^3.1.0",
     "oav": "^2.1.0"
   },
   "devDependencies": {
-    "@types/express-oauth-server": "^2.0.2",
     "@types/ajv-keywords": "^3.4.0",
     "@types/ajv-merge-patch": "^4.1.0",
     "@types/commonmark": "^0.27.3",
+    "@types/config": "0.0.38",
+    "@types/express-oauth-server": "^2.0.2",
     "@types/glob": "^7.1.1",
     "@types/jest": "^24.0.25",
     "@types/js-yaml": "^3.12.1",
