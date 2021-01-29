@@ -272,6 +272,6 @@ async function generate(genrator: ExampleGenerator,
     spec,
     'unknown'
   );
-  console.log(example);
+  console.log(JSON.stringify(example));
   return example;
 }
