@@ -1,6 +1,6 @@
 import * as express from "express";
-import { validateRequest } from "./validator";
-import { isNullOrUndefined } from "./utils"
+import { validateRequest } from "../mid/cordinator";
+import { isNullOrUndefined } from "../common/utils"
 
 let profiles: Record<string, any> = {
     "443": {

@@ -1,9 +1,9 @@
 import bodyParser = require('body-parser');
 import express = require('express');
-import {mockAuthServer} from "./authserver"
-import {mockMetadataEndpints} from "./metadata-endpoints";
-import {validateRequestAndMockResponse} from "./validateRequestAndMockResponse";
-import {getHttpsServer, getHttpServer} from "./httpServerConstructor";
+import {mockAuthServer} from "./webserver/authserver"
+import {mockMetadataEndpints} from "./webserver/metadata-endpoints";
+import {validateRequestAndMockResponse} from "./webserver/validateRequestAndMockResponse";
+import {getHttpsServer, getHttpServer} from "./webserver/httpServerConstructor";
 
 function main() {
     let app = express();

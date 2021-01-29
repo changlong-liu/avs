@@ -27,6 +27,12 @@ After the virtual service is started in local computer, below section describe h
 # // try any az commands here
 ```
 
+### Use mock authentication
+The Virtual service also provided mocked Microsoft OAuth service. If you don't want to use real-word authentication in virtual service, you can redirect login.microsoftonline.com to 127.0.0.1 in the hosts file in your OS, then use can login virtual service with any faked service principal.
+``` (in C:\Windows\System32\drivers\etc\hosts for windows)
+127.0.0.1 login.microsoftonline.com
+```
+
 ## What's Next
 + mock response through example files
 + mock response by request
