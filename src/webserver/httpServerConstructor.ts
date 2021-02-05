@@ -17,7 +17,7 @@ export function getHttpsServer(app: any | express.Express) {
         "login.microsoftonline.com": {
             key: ".ssh/login_microsoftonline_com_ca.key",
             cert: ".ssh/login_microsoftonline_com_ca.crt",
-        },
+        }
     };
     const secureContexts = getSecureContexts(certs);
     const options = {
