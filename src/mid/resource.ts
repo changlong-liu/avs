@@ -1,6 +1,5 @@
-
 import express = require('express');
-import { getPath, getPureUrl, isNullOrUndefined } from "../common/utils"
+import { getPath, getPureUrl, isNullOrUndefined } from '../common/utils';
 
 export class ResourceNode {
     public children: Record<string, ResourceNode>;
@@ -19,20 +18,32 @@ export class ResourcePool {
         const url = getPureUrl(req.url);
         const path = getPath(url);
         if (req.method == 'PUT') {
-            ResourcePool.addResource(this.resourceRoot, path, req.url, path[path.length - 1], req.body)
+            ResourcePool.addResource(
+                this.resourceRoot,
+                path,
+                req.url,
+                path[path.length - 1],
+                req.body,
+            );
         }
         if (req.method == 'DELETE') {
             ResourcePool.deleteResource(this.resourceRoot, path);
         }
     }
 
-    public static addResource(node: ResourceNode, path: string[], url: string, name: string, body: any) {
+    public static addResource(
+        node: ResourceNode,
+        path: string[],
+        url: string,
+        name: string,
+        body: any,
+    ) {
         if (path.length == 0) {
             node.url = url;
             node.name = name;
             node.body = body;
             return;
-        };
+        }
         const _name = path[0].toLowerCase();
         if (!(_name in node.children)) {
             node.children[_name] = new ResourceNode();
@@ -52,8 +63,9 @@ export class ResourcePool {
 
     public static getResource(node: ResourceNode, path: string[]): ResourceNode | undefined {
         if (path.length == 0) return node;
-        const name = path[0].toLowerCase()
-        if (name in node.children) return ResourcePool.getResource(node.children[name], path.slice(1));
+        const name = path[0].toLowerCase();
+        if (name in node.children)
+            return ResourcePool.getResource(node.children[name], path.slice(1));
         return undefined;
     }
 
@@ -63,8 +75,7 @@ export class ResourcePool {
         if (name in node.children) {
             if (path.length == 1) {
                 delete node.children[name];
-            }
-            else {
+            } else {
                 ResourcePool.deleteResource(node.children[name], path.slice(1));
             }
         }

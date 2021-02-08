@@ -1,17 +1,23 @@
-
-import * as lodash from "lodash";
+import * as lodash from 'lodash';
 
 export function isNullOrUndefined(obj: any) {
     return obj === null || obj === undefined;
 }
 
-export function replacePropertyValue(property: string, newVal: any, object: any, where = (v: any) => { return true; }) {
+export function replacePropertyValue(
+    property: string,
+    newVal: any,
+    object: any,
+    where = (v: any) => {
+        return true;
+    },
+) {
     const newObject = lodash.clone(object);
 
     lodash.each(object, (val, key) => {
         if (key === property && where(val)) {
             newObject[key] = newVal;
-        } else if (typeof (val) === 'object') {
+        } else if (typeof val === 'object') {
             newObject[key] = replacePropertyValue(property, newVal, val);
         }
     });
@@ -27,11 +33,9 @@ export function getPath(pureUrl: string) {
     return pureUrl.split('/').slice(1);
 }
 
-
 export function isObject(item: any) {
-    return (item && typeof item === 'object' && !Array.isArray(item));
+    return item && typeof item === 'object' && !Array.isArray(item);
 }
-
 
 export function mergeDeep(target: any, ...sources: any[]): any {
     if (!sources.length) return target;
