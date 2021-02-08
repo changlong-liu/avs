@@ -1,6 +1,5 @@
 
 import * as lodash from "lodash";
-import ExampleGenerator from "oav/dist/lib/generator/exampleGenerator";
 import { LiveValidator, LiveValidationResult } from "oav/dist/lib/liveValidation/liveValidator";
 import { LiveRequest, LiveResponse, ValidationRequest } from "oav/dist/lib/liveValidation/operationValidator"
 import { OperationSearcher } from "oav/lib/liveValidation/operationSearcher";
@@ -64,11 +63,7 @@ export async function validateRequest(req: express.Request, res: express.Respons
     const specItem = {
       content: result.operationMatch.operation
     }
-    let generator = new ExampleGenerator(
-      specRepoDir//,
-      //path.resolve(payloadDir, rp + apiVersion)
-    );
-    let example = await generate(generator, specItem, operationId);
+    let example = await generate(specItem);
     genStatefulResponse(req, res, example.responses, profile);
   }
   else {
