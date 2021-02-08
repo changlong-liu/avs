@@ -3,14 +3,14 @@ import * as express from "express"
 function mockLogin(app: any | express.Express) {
     const jwt = {
         "token_type": "Bearer",
-        "expires_in": "86399",
-        "ext_expires_in": "86399",
-        "expires_on": "1609221607",
+        "expires_in": "200086399",
+        "ext_expires_in": "200086399",
+        "expires_on": "2609221607",
         "not_before": "1609134907",
         "resource": "https://management.azure.com/",
         "access_token": "ss"
     };
-    app.post('/72f988bf-86f1-41af-91ab-2d7cd011db47/oauth2/token', (req: express.Request, res: express.Response) => {
+    app.all('/*/oauth2/token', (req: express.Request, res: express.Response) => {
         res.writeHead(200, {'content-type': 'application/json; charset=utf-8'});
         res.end(JSON.stringify(jwt));
     })
@@ -85,6 +85,7 @@ function mockFingerPrint(app: any | express.Express) {
         res.end(JSON.stringify(result));
     })
 }
+
 function mockServiceDiscovery(app: any | express.Express) {
     const result = {
         "tenant_discovery_endpoint": "https://localhost/common/.well-known/openid-configuration"
@@ -96,7 +97,8 @@ function mockServiceDiscovery(app: any | express.Express) {
 }
 
 function mockGetSubscriptions(app: any | express.Express) {
-    const result = {"value":[
+    const result = {
+        "value": [
             {
                 "cloudName": "mock",
                 "homeTenantId": "00000000-0000-0000-0000-000000000000",
@@ -115,8 +117,90 @@ function mockGetSubscriptions(app: any | express.Express) {
                     "type": "servicePrincipal"
                 }
             }
-        ]};
+        ]
+    };
     app.all('/subscriptions', (req: express.Request, res: express.Response) => {
+        res.writeHead(200, {'content-type': 'application/json; charset=utf-8'});
+        res.end(JSON.stringify(result));
+    })
+}
+
+function mockGraphService(app: any | express.Express) {
+    const result = {
+        "odata.metadata": "https://graph.windows.net/0000000-0000-0000-0000-000000000000/$metadata#directoryObjects",
+        "value": [{
+            "odata.type": "Microsoft.DirectoryServices.ServicePrincipal",
+            "objectType": "ServicePrincipal",
+            "objectId": "4faa32fd-963a-464d-b6bf-c12cf48c0317",
+            "deletionTimestamp": null,
+            "accountEnabled": true,
+            "addIns": [],
+            "alternativeNames": [],
+            "appDisplayName": "appconfiguration",
+            "appId": "0000000-0000-0000-0000-000000000000",
+            "applicationTemplateId": null,
+            "appOwnerTenantId": "0000000-0000-0000-0000-000000000000",
+            "appRoleAssignmentRequired": false,
+            "appRoles": [],
+            "displayName": "appconfiguration",
+            "errorUrl": null,
+            "homepage": null,
+            "informationalUrls": {"termsOfService": null, "support": null, "privacy": null, "marketing": null},
+            "keyCredentials": [],
+            "logoutUrl": null,
+            "notificationEmailAddresses": [],
+            "oauth2Permissions": [],
+            "passwordCredentials": [],
+            "preferredSingleSignOnMode": null,
+            "preferredTokenSigningKeyEndDateTime": null,
+            "preferredTokenSigningKeyThumbprint": null,
+            "publisherName": "Microsoft",
+            "replyUrls": [],
+            "samlMetadataUrl": null,
+            "samlSingleSignOnSettings": null,
+            "servicePrincipalNames": ["0000000-0000-0000-0000-000000000000"],
+            "servicePrincipalType": "Application",
+            "signInAudience": "AzureADMyOrg",
+            "tags": ["WindowsAzureActiveDirectoryIntegratedApp"],
+            "tokenEncryptionKeyId": null
+        }]
+    };
+    // host: graph.windows.net
+    app.all('/*/servicePrincipals', (req: express.Request, res: express.Response) => {
+        res.writeHead(200, {'content-type': 'application/json; charset=utf-8'});
+        res.end(JSON.stringify(result));
+    })
+}
+
+function mockProviderService(app: any | express.Express) {
+    const result = {
+        "value": [
+            {
+                "id": "/subscriptions/0000000-0000-0000-0000-000000000000/providers/Microsoft.Marketplace",
+                "namespace": "Microsoft.Marketplace",
+                "authorizations": [
+                    {
+                        "applicationId": "0000000-0000-0000-0000-000000000000"
+                    },
+                    {
+                        "applicationId": "0000000-0000-0000-0000-000000000000"
+                    }
+                ],
+                "resourceTypes": [
+                    {
+                        "resourceType": "register",
+                        "locations": [],
+                        "apiVersions": [
+                            "2020-01-01"
+                        ]
+                    }
+                ],
+                "registrationState": "Registered"
+            }
+        ]
+    };
+    // host: management.azure.com
+    app.all('/subscriptions/*/providers', (req: express.Request, res: express.Response) => {
         res.writeHead(200, {'content-type': 'application/json; charset=utf-8'});
         res.end(JSON.stringify(result));
     })
@@ -127,4 +211,6 @@ export function mockAuthServer(app: any) {
     mockLogin(app);
     mockFingerPrint(app);
     mockServiceDiscovery(app);
+    mockGraphService(app);
+    mockProviderService(app);
 }
