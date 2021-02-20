@@ -21,7 +21,6 @@
         "@typescript-eslint"
     ],
     "rules": {
-        "semi": [2, "always"],
         "prefer-template": 0,
         "linebreak-style": 0,
         "indent": 0,

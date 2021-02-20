@@ -1,4 +1,4 @@
-import * as express from 'express';
+import * as express from 'express'
 
 function mockLogin(app: any | express.Express) {
     const jwt = {
@@ -8,12 +8,12 @@ function mockLogin(app: any | express.Express) {
         expires_on: '2609221607',
         not_before: '1609134907',
         resource: 'https://management.azure.com/',
-        access_token: 'ss',
-    };
+        access_token: 'ss'
+    }
     app.all('/*/oauth2/token', (req: express.Request, res: express.Response) => {
-        res.writeHead(200, { 'content-type': 'application/json; charset=utf-8' });
-        res.end(JSON.stringify(jwt));
-    });
+        res.writeHead(200, { 'content-type': 'application/json; charset=utf-8' })
+        res.end(JSON.stringify(jwt))
+    })
 }
 
 function mockFingerPrint(app: any | express.Express) {
@@ -22,7 +22,7 @@ function mockFingerPrint(app: any | express.Express) {
         token_endpoint_auth_methods_supported: [
             'client_secret_post',
             'private_key_jwt',
-            'client_secret_basic',
+            'client_secret_basic'
         ],
         jwks_uri: 'https://localhost/common/discovery/keys',
         response_modes_supported: ['query', 'fragment', 'form_post'],
@@ -54,7 +54,7 @@ function mockFingerPrint(app: any | express.Express) {
             'email',
             'given_name',
             'family_name',
-            'nickname',
+            'nickname'
         ],
         check_session_iframe: 'https://localhost/common/oauth2/checksession',
         userinfo_endpoint: 'https://localhost/common/openid/userinfo',
@@ -62,25 +62,25 @@ function mockFingerPrint(app: any | express.Express) {
         cloud_instance_name: 'microsoftonline.de',
         cloud_graph_host_name: 'graph.cloudapi.de',
         msgraph_host: 'graph.microsoft.de',
-        rbac_url: 'https://pas.cloudapi.de',
-    };
+        rbac_url: 'https://pas.cloudapi.de'
+    }
     app.get(
         '/common/.well-known/openid-configuration',
         (req: express.Request, res: express.Response) => {
-            res.writeHead(200, { 'content-type': 'application/json; charset=utf-8' });
-            res.end(JSON.stringify(result));
-        },
-    );
+            res.writeHead(200, { 'content-type': 'application/json; charset=utf-8' })
+            res.end(JSON.stringify(result))
+        }
+    )
 }
 
 function mockServiceDiscovery(app: any | express.Express) {
     const result = {
-        tenant_discovery_endpoint: 'https://localhost/common/.well-known/openid-configuration',
-    };
+        tenant_discovery_endpoint: 'https://localhost/common/.well-known/openid-configuration'
+    }
     app.get('/common/discovery/instance', (req: express.Request, res: express.Response) => {
-        res.writeHead(200, { 'content-type': 'application/json; charset=utf-8' });
-        res.end(JSON.stringify(result));
-    });
+        res.writeHead(200, { 'content-type': 'application/json; charset=utf-8' })
+        res.end(JSON.stringify(result))
+    })
 }
 
 function mockGetSubscriptions(app: any | express.Express) {
@@ -93,23 +93,23 @@ function mockGetSubscriptions(app: any | express.Express) {
                 isDefault: false,
                 managedByTenants: [
                     {
-                        tenantId: '00000000-0000-0000-0000-000000000000',
-                    },
+                        tenantId: '00000000-0000-0000-0000-000000000000'
+                    }
                 ],
                 name: 'Code generate Test and Infra',
                 state: 'Enabled',
                 tenantId: '00000000-0000-0000-0000-000000000000',
                 user: {
                     name: '00000000-0000-0000-0000-000000000000',
-                    type: 'servicePrincipal',
-                },
-            },
-        ],
-    };
+                    type: 'servicePrincipal'
+                }
+            }
+        ]
+    }
     app.all('/subscriptions', (req: express.Request, res: express.Response) => {
-        res.writeHead(200, { 'content-type': 'application/json; charset=utf-8' });
-        res.end(JSON.stringify(result));
-    });
+        res.writeHead(200, { 'content-type': 'application/json; charset=utf-8' })
+        res.end(JSON.stringify(result))
+    })
 }
 
 function mockGraphService(app: any | express.Express) {
@@ -138,7 +138,7 @@ function mockGraphService(app: any | express.Express) {
                     termsOfService: null,
                     support: null,
                     privacy: null,
-                    marketing: null,
+                    marketing: null
                 },
                 keyCredentials: [],
                 logoutUrl: null,
@@ -156,15 +156,15 @@ function mockGraphService(app: any | express.Express) {
                 servicePrincipalType: 'Application',
                 signInAudience: 'AzureADMyOrg',
                 tags: ['WindowsAzureActiveDirectoryIntegratedApp'],
-                tokenEncryptionKeyId: null,
-            },
-        ],
-    };
+                tokenEncryptionKeyId: null
+            }
+        ]
+    }
     // host: graph.windows.net
     app.all('/*/servicePrincipals', (req: express.Request, res: express.Response) => {
-        res.writeHead(200, { 'content-type': 'application/json; charset=utf-8' });
-        res.end(JSON.stringify(result));
-    });
+        res.writeHead(200, { 'content-type': 'application/json; charset=utf-8' })
+        res.end(JSON.stringify(result))
+    })
 }
 
 function mockProviderService(app: any | express.Express) {
@@ -176,35 +176,35 @@ function mockProviderService(app: any | express.Express) {
                 namespace: 'Microsoft.Marketplace',
                 authorizations: [
                     {
-                        applicationId: '0000000-0000-0000-0000-000000000000',
+                        applicationId: '0000000-0000-0000-0000-000000000000'
                     },
                     {
-                        applicationId: '0000000-0000-0000-0000-000000000000',
-                    },
+                        applicationId: '0000000-0000-0000-0000-000000000000'
+                    }
                 ],
                 resourceTypes: [
                     {
                         resourceType: 'register',
                         locations: [],
-                        apiVersions: ['2020-01-01'],
-                    },
+                        apiVersions: ['2020-01-01']
+                    }
                 ],
-                registrationState: 'Registered',
-            },
-        ],
-    };
+                registrationState: 'Registered'
+            }
+        ]
+    }
     // host: management.azure.com
     app.all('/subscriptions/*/providers', (req: express.Request, res: express.Response) => {
-        res.writeHead(200, { 'content-type': 'application/json; charset=utf-8' });
-        res.end(JSON.stringify(result));
-    });
+        res.writeHead(200, { 'content-type': 'application/json; charset=utf-8' })
+        res.end(JSON.stringify(result))
+    })
 }
 
 export function mockAuthServer(app: any) {
-    mockGetSubscriptions(app);
-    mockLogin(app);
-    mockFingerPrint(app);
-    mockServiceDiscovery(app);
-    mockGraphService(app);
-    mockProviderService(app);
+    mockGetSubscriptions(app)
+    mockLogin(app)
+    mockFingerPrint(app)
+    mockServiceDiscovery(app)
+    mockGraphService(app)
+    mockProviderService(app)
 }

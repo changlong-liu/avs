@@ -1,8 +1,8 @@
-import * as express from 'express';
+import * as express from 'express'
 
 export function mockMetadataEndpints(app: any | express.Express) {
     app.get('/metadata/endpoints', (req: express.Request, res: express.Response) => {
-        console.log('fetching metadata');
+        console.log('fetching metadata')
 
         const ret = {
             galleryEndpoint: '',
@@ -15,12 +15,12 @@ export function mockMetadataEndpints(app: any | express.Express) {
                 audiences: [
                     // "http://localhost:8081",
                     'https://management.core.chinacloudapi.cn/',
-                    'https://management.chinacloudapi.cn/',
-                ],
-            },
-        };
+                    'https://management.chinacloudapi.cn/'
+                ]
+            }
+        }
 
-        res.writeHead(200, { 'content-type': 'application/json; charset=utf-8' });
-        res.end(JSON.stringify(ret));
-    });
+        res.writeHead(200, { 'content-type': 'application/json; charset=utf-8' })
+        res.end(JSON.stringify(ret))
+    })
 }
