@@ -7,16 +7,16 @@ import http = require('http')
 export function getHttpsServer(app: any | express.Express) {
     const certs = {
         '127.0.0.1': {
-            key: '.ssh/127_0_0_1_ca.key',
-            cert: '.ssh/127_0_0_1_ca.cer'
+            key: '.ssh/127-0-0-1-ca.pem',
+            cert: '.ssh/127-0-0-1-ca.cer'
         },
         localhost: {
-            key: '.ssh/localhost_ca.key',
-            cert: '.ssh/localhost_ca.crt'
+            key: '.ssh/localhost-ca.pem',
+            cert: '.ssh/localhost-ca.crt'
         },
         'login.microsoftonline.com': {
-            key: '.ssh/login_microsoftonline_com_ca.key',
-            cert: '.ssh/login_microsoftonline_com_ca.crt'
+            key: '.ssh/login-microsoftonline-com-ca.pem',
+            cert: '.ssh/login-microsoftonline-com-ca.crt'
         }
     }
     const secureContexts = getSecureContexts(certs)
