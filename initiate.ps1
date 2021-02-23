@@ -15,11 +15,11 @@ foreach($secret in $secrets) {
     Write-Host "Adding secret: $name"
 
     $arr = $value.split(' ')
-    "-----BEGIN RSA PRIVATE KEY-----" | Out-File -FilePath .ssh/$name".pem" -Encoding utf8
+    "-----BEGIN RSA PRIVATE KEY-----" | Out-File -FilePath .ssh/$name".pem" -Encoding ascii
     foreach($line in $arr) {
-        "$line" | Out-File -Append -FilePath .ssh/$name".pem" -Encoding utf8
+        "$line" | Out-File -Append -FilePath .ssh/$name".pem" -Encoding ascii
     }
-    "-----END RSA PRIVATE KEY-----" | Out-File -Append -FilePath .ssh/$name".pem" -Encoding utf8
+    "-----END RSA PRIVATE KEY-----" | Out-File -Append -FilePath .ssh/$name".pem" -Encoding ascii
 }
 
 Write-Host "Done"
