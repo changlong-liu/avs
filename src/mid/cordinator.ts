@@ -5,7 +5,7 @@ import {
     LiveResponse,
     ValidationRequest
 } from 'oav/dist/lib/liveValidation/operationValidator'
-import { OperationSearcher } from 'oav/lib/liveValidation/operationSearcher'
+import { OperationSearcher, OperationMatch } from 'oav/dist/lib/liveValidation/operationSearcher'
 import * as Constants from 'oav/dist/lib/util/constants'
 import { specRepoDir } from '../common/config'
 import { generate } from './responser'
@@ -19,6 +19,7 @@ import {
     ERROR_INTENTIONAL
 } from '../common/errors'
 import express = require('express')
+import { get_locations } from './specials'
 
 const options = {
     swaggerPaths: [],
@@ -50,6 +51,36 @@ function findResponse(responses: Record<string, any>, status: number) {
     return nearest ? responses[nearest.toString()] : {}
 }
 
+function search(
+    searcher: OperationSearcher,
+    info: ValidationRequest
+): {
+    operationMatch: OperationMatch
+    apiVersion: string
+} {
+    const requestInfo = { ...info }
+    const searchOperation = () => {
+        const operations = searcher.getPotentialOperations(requestInfo)
+        return operations
+    }
+    let potentialOperations = searchOperation()
+    const firstReason = potentialOperations.reason
+
+    if (potentialOperations?.matches.length === 0) {
+        requestInfo.apiVersion = Constants.unknownApiVersion
+        potentialOperations = searchOperation()
+    }
+
+    if (potentialOperations.matches.length === 0) {
+        throw firstReason ?? potentialOperations.reason
+    }
+
+    return {
+        operationMatch: potentialOperations.matches[0],
+        apiVersion: potentialOperations.apiVersion
+    }
+}
+
 export async function validateRequest(
     req: express.Request,
     res: express.Response,
@@ -71,8 +102,11 @@ export async function validateRequest(
     )
     const validateResult = await validator.validateLiveRequest(liveRequest)
 
-    if (validateResult.isSuccessful) {
-        const result = validator.operationSearcher.search(validationRequest)
+    if (
+        validateResult.isSuccessful ||
+        validateResult.runtimeException?.code == Constants.ErrorCodes.MultipleOperationsFound.name
+    ) {
+        const result = search(validator.operationSearcher, validationRequest)
         // console.log("operation: ", result);
         const operationId = result.operationMatch.operation.operationId as string
         const specItem = {
@@ -123,6 +157,15 @@ export function handleSpecials(
                         type: 'Microsoft.Resources/resourceGroups'
                     }
                 }
+            }
+        }
+        if (path.length == 3 && path[2].toLowerCase() == 'locations') {
+            return {
+                200: replacePropertyValue(
+                    '0000000-0000-0000-0000-000000000000',
+                    path[1],
+                    get_locations
+                )
             }
         }
     }
