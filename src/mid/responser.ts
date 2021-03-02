@@ -1,7 +1,7 @@
 import * as path from 'path'
 import { JsonLoader } from 'oav/dist/lib/swagger/jsonLoader'
 import { Operation, SwaggerSpec } from 'oav/dist/lib/swagger/swaggerTypes'
-import SwaggerMocker from 'oav/dist/lib/generator/swaggerMocker'
+import SwaggerMocker from './oav/swaggerMocker'
 import { MockerCache, PayloadCache } from 'oav/dist/lib/generator/exampleCache'
 import { isNullOrUndefined } from '../common/utils'
 import { specRepoDir } from '../common/config'
