@@ -1,5 +1,6 @@
-export const STATUS_CODE_404 = 404
 export const STATUS_CODE_200 = 200
+export const STATUS_CODE_204 = 204
+export const STATUS_CODE_404 = 404
 export const STATUS_CODE_500 = 500
 
 export const ERR_NOT_FOUND = 'Resource Not Found'

@@ -1,21 +1,20 @@
 import * as lodash from 'lodash'
-import { LiveValidator, LiveValidationResult } from 'oav/dist/lib/liveValidation/liveValidator'
-import {
-    LiveRequest,
-    LiveResponse,
-    ValidationRequest
-} from 'oav/dist/lib/liveValidation/operationValidator'
+import { LiveValidator } from 'oav/dist/lib/liveValidation/liveValidator'
+import { ValidationRequest } from 'oav/dist/lib/liveValidation/operationValidator'
 import { OperationSearcher, OperationMatch } from 'oav/dist/lib/liveValidation/operationSearcher'
 import * as Constants from 'oav/dist/lib/util/constants'
 import { specRepoDir } from '../common/config'
 import { generate } from './responser'
 import { ResourcePool } from './resource'
 import { isNullOrUndefined, replacePropertyValue, getPureUrl, getPath } from '../common/utils'
-import http = require('http')
+
 import {
     createErrorBody,
     ERR_NOT_FOUND,
+    STATUS_CODE_200,
+    STATUS_CODE_204,
     STATUS_CODE_404,
+    STATUS_CODE_500,
     ERROR_INTENTIONAL
 } from '../common/errors'
 import express = require('express')
@@ -38,7 +37,7 @@ const validator = new LiveValidator(options)
     console.log('validator initialized')
 })()
 
-function findResponse(responses: Record<string, any>, status: number) {
+function findResponse(responses: Record<string, any>, status: number): [any, any] {
     let nearest = undefined
     for (const code in responses) {
         if (
@@ -48,7 +47,7 @@ function findResponse(responses: Record<string, any>, status: number) {
             nearest = parseInt(code)
         }
     }
-    return nearest ? responses[nearest.toString()] : {}
+    return nearest ? [nearest, responses[nearest.toString()].body] : [STATUS_CODE_500, {}]
 }
 
 function search(
@@ -144,7 +143,7 @@ export function handleSpecials(
         if (path.length == 4 && path[2].toLowerCase() == 'resourcegroups') {
             // handle "/subscriptions/xxx/resourceGroups/xxx"
             return {
-                '200': {
+                [STATUS_CODE_200]: {
                     body: {
                         id: getPureUrl(req.url),
                         location: 'eastus',
@@ -161,7 +160,7 @@ export function handleSpecials(
         }
         if (path.length == 3 && path[2].toLowerCase() == 'locations') {
             return {
-                200: replacePropertyValue(
+                [STATUS_CODE_200]: replacePropertyValue(
                     '0000000-0000-0000-0000-000000000000',
                     path[1],
                     get_locations
@@ -187,11 +186,25 @@ export function genStatefulResponse(
         res.status(STATUS_CODE_404).json(createErrorBody(STATUS_CODE_404, ERR_NOT_FOUND))
     } else {
         resourcePool.updateResourcePool(req)
-        let ret = findResponse(exampleResponses, 200).body
+        const [code, _ret] = findResponse(exampleResponses, STATUS_CODE_200)
+
+        let ret = _ret
+        // simplified paging
+        ret = lodash.omit(ret, 'nextLink')
 
         // simplified LRO
-        ret = lodash.omit(ret, 'nextLink')
         ret = replacePropertyValue('provisioningState', 'Succeeded', ret)
+        const LRO_CALLBACK = 'lro-callback'
+        if ([STATUS_CODE_200, STATUS_CODE_204].indexOf(code) < 0 && code < 300) {
+            res.setHeader(
+                'Azure-AsyncOperation',
+                `${req.protocol}://${req.get('host')}${req.url}&${LRO_CALLBACK}=true`
+            )
+            res.setHeader('Retry-After', 1)
+        }
+        if (req.query?.[LRO_CALLBACK] == 'true') {
+            ret.status = 'Succeeded'
+        }
 
         //set name
         const path = getPath(getPureUrl(req.url))
@@ -199,7 +212,7 @@ export function genStatefulResponse(
             return typeof v === 'string'
         })
 
-        res.status(200).json(ret)
+        res.status(code).json(ret)
     }
 }
 
