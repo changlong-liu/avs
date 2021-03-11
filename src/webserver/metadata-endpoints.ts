@@ -1,8 +1,9 @@
 import * as express from 'express'
+import { logger } from '../common/utils'
 
 export function mockMetadataEndpints(app: any | express.Express) {
     app.get('/metadata/endpoints', (req: express.Request, res: express.Response) => {
-        console.log('fetching metadata')
+        logger.info('fetching metadata')
 
         const ret = {
             galleryEndpoint: '',

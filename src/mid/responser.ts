@@ -5,7 +5,6 @@ import SwaggerMocker from './oav/swaggerMocker'
 import { MockerCache, PayloadCache } from 'oav/dist/lib/generator/exampleCache'
 import { isNullOrUndefined } from '../common/utils'
 import { specRepoDir } from '../common/config'
-import { OperationInfo } from 'oav/dist/lib/models'
 import * as fs from 'fs'
 
 const jsonLoader = JsonLoader.create({})
@@ -62,7 +61,6 @@ export async function generate(specItem: SpecItem) {
         parameters: {}
     }
     swaggerMocker.mockForExample(example, specItem, spec, 'unknown')
-    console.log(JSON.stringify(example))
     return example
 }
 

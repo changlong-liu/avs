@@ -1,6 +1,6 @@
 import * as express from 'express'
 import { validateRequest } from '../mid/cordinator'
-import { isNullOrUndefined } from '../common/utils'
+import { isNullOrUndefined, logger } from '../common/utils'
 import { profiles } from '../common/config'
 
 function getProfileByHost(host: string): Record<string, any> {
@@ -13,13 +13,17 @@ function getProfileByHost(host: string): Record<string, any> {
 }
 export function validateRequestAndMockResponse(app: any | express.Express) {
     app.all('*', (req: express.Request, res: express.Response) => {
-        console.log(
-            req.method,
-            'hitting: ',
-            req.originalUrl,
-            ' with body: ',
-            JSON.stringify(req.body)
+        logger.info(
+            `[HITTING] ${req.method} ${req.originalUrl} with body: ${JSON.stringify(
+                req.body,
+                null,
+                4
+            )}`
         )
+        res.on('finish', () => {
+            logger.info(`[RESPONSE] code: ${res.statusCode}`)
+        })
+
         validateRequest(req, res, getProfileByHost(req.headers.host as string)).catch((reason) => {
             res.status(500).json({ error: reason })
         })

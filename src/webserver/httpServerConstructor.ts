@@ -3,6 +3,7 @@ import * as fs from 'fs'
 import * as tls from 'tls'
 import https = require('https')
 import http = require('http')
+import { logger } from '../common/utils'
 
 export function getHttpsServer(app: any | express.Express) {
     const certs = {
@@ -26,9 +27,9 @@ export function getHttpsServer(app: any | express.Express) {
             const ctx = secureContexts[servername]
 
             if (!ctx) {
-                console.log('Not found SSL certificate for host: ' + servername)
+                logger.error('Not found SSL certificate for host: ' + servername)
             } else {
-                console.log('SSL certificate has been found and assigned to ' + servername)
+                logger.info('SSL certificate has been found and assigned to ' + servername)
             }
 
             if (cb) {
