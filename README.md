@@ -98,7 +98,7 @@ The Virtual Server is using a self-signed certificate, so need to trust it by ap
 ~~~
 or
 ~~~ bat
-> type .ssh\localhost-ca.crt >> <YOUR_VENV>\Lib\site-packages\certifi\cacert.pem    // for Windows
+> type .ssh\localhost-ca.crt >> <YOUR_VENV>\Lib\site-packages\certifi\cacert.pem                // for Windows
 ~~~
 
 ### 2.3 Ask Azure CLI to use local Virtual Server
@@ -153,7 +153,7 @@ Following the [Autorest.az Guide](https://github.com/Azure/autorest.az#how-to-us
             --use=https://trenton.blob.core.windows.net/trenton/autorest-az-1.7.3.tgz
             <path-to-the-swagger-readme.md> 
             --azure-cli-extension-folder=<output-folder>
-+           --gen-cmd-test               // remember to add this option if want to run cmdlet tests (in Step 4)
++           --gen-cmdlet-test               // remember to add this option if want to run cmdlet tests (in Step 4)
 # cd <output-folder>/<extension-folder>
 # python setup.py sdist bdist_wheel         // generate wheel-file (*.whl) in "dist" folder
 # az extension add --source=<path-to-the-wheel-file>
@@ -172,7 +172,7 @@ Below is sample steps for generate CLI extension for RP [guestconfiguration](htt
             --use=https://trenton.blob.core.windows.net/trenton/autorest-az-1.7.3.tgz
             ..\azure-rest-api-specs\specification\guestconfiguration\resource-manager\readme.md
             --azure-cli-extension-folder=..\generated
-            --gen-cmd-test
+            --gen-cmdlet-test
 # cd ..\generated                     // go to the output folder
 # cd src\guestconfig                  // go to the generated extension folder       
 # python setup.py sdist bdist_wheel
@@ -182,7 +182,7 @@ Below is sample steps for generate CLI extension for RP [guestconfiguration](htt
 # az guestconfig --help               // check information for the guestconfig extension.
 ...
 ~~~
-> **_NOTE:_** The variable <extension-name> can be find in readme.az.md. For guestconfiguration, it's ["extensions: guestconfig"](https://github.com/Azure/azure-rest-api-specs/blob/master/specification/guestconfiguration/resource-manager/readme.az.md#az)
+> **_NOTE:_** The variable <extension-name> can be found in readme.az.md. For guestconfiguration, it's ["extensions: guestconfig"](https://github.com/Azure/azure-rest-api-specs/blob/master/specification/guestconfiguration/resource-manager/readme.az.md#az)
 
 ## Step 4: Test generated cmdlets in one command
 Testcases are also generated for the CLI extension, you can run the end-to-end test case with virtual server in one command.

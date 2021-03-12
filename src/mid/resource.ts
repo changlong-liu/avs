@@ -1,4 +1,4 @@
-import express = require('express')
+import { VirtualServerRequest } from './models'
 import { getPath, getPureUrl, isNullOrUndefined } from '../common/utils'
 
 export class ResourceNode {
@@ -14,7 +14,7 @@ export class ResourcePool {
         this.resourceRoot = new ResourceNode()
     }
 
-    public updateResourcePool(req: express.Request) {
+    public updateResourcePool(req: VirtualServerRequest) {
         const url = getPureUrl(req.url)
         const path = getPath(url)
         if (req.method == 'PUT') {
@@ -51,12 +51,12 @@ export class ResourcePool {
         ResourcePool.addResource(node.children[_name], path.slice(1), url, name, body)
     }
 
-    public hasUrl(req: express.Request): boolean {
+    public hasUrl(req: VirtualServerRequest): boolean {
         const url: string = getPureUrl(req.url) as string
         return !isNullOrUndefined(ResourcePool.getResource(this.resourceRoot, getPath(url)))
     }
 
-    public static isListUrl(req: express.Request): boolean {
+    public static isListUrl(req: VirtualServerRequest): boolean {
         const url: string = getPureUrl(req.url) as string
         return url.split('/').slice(1).length % 2 == 1
     }

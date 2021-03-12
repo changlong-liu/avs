@@ -1,24 +1,22 @@
-import * as lodash from 'lodash'
-import { LiveValidator } from 'oav/dist/lib/liveValidation/liveValidator'
-import { ValidationRequest } from 'oav/dist/lib/liveValidation/operationValidator'
-import { OperationSearcher, OperationMatch } from 'oav/dist/lib/liveValidation/operationSearcher'
 import * as Constants from 'oav/dist/lib/util/constants'
-import { specRepoDir } from '../common/config'
-import { generate } from './responser'
-import { ResourcePool } from './resource'
-import { isNullOrUndefined, replacePropertyValue, getPureUrl, getPath } from '../common/utils'
-
+import * as lodash from 'lodash'
 import {
-    createErrorBody,
+    ERROR_INTENTIONAL,
     ERR_NOT_FOUND,
     STATUS_CODE_200,
     STATUS_CODE_204,
     STATUS_CODE_404,
-    STATUS_CODE_500,
-    ERROR_INTENTIONAL
+    STATUS_CODE_500
 } from '../common/errors'
-import express = require('express')
+import { LiveValidator } from 'oav/dist/lib/liveValidation/liveValidator'
+import { OperationMatch, OperationSearcher } from 'oav/dist/lib/liveValidation/operationSearcher'
+import { ResourcePool } from './resource'
+import { ValidationRequest } from 'oav/dist/lib/liveValidation/operationValidator'
+import { VirtualServerRequest, VirtualServerResponse } from './models'
+import { generate } from './responser'
+import { getPath, getPureUrl, logger, replacePropertyValue } from '../common/utils'
 import { get_locations } from './specials'
+import { specRepoDir } from '../common/config'
 
 const options = {
     swaggerPaths: [],
@@ -31,11 +29,21 @@ const options = {
     directory: specRepoDir
 }
 
-const validator = new LiveValidator(options)
-;(async () => {
-    await validator.initialize()
-    console.log('validator initialized')
-})()
+export function InitializeValidator(
+    _options: any,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    callback = (v: LiveValidator): any => {
+        logger.info('validator initialized')
+    }
+): LiveValidator {
+    const ret = new LiveValidator(_options)
+    ;(async () => {
+        await ret.initialize()
+        callback(ret)
+    })()
+    return ret
+}
+const validator = InitializeValidator(options)
 
 function findResponse(responses: Record<string, any>, status: number): [any, any] {
     let nearest = undefined
@@ -80,12 +88,12 @@ function search(
     }
 }
 
-export async function validateRequest(
-    req: express.Request,
-    res: express.Response,
+export async function generateResponse(
+    req: VirtualServerRequest,
+    res: VirtualServerResponse,
     profile: Record<string, any>
 ): Promise<void> {
-    const fullUrl = req.protocol + '://' + req.get('host') + req.originalUrl
+    const fullUrl = req.protocol + '://' + req.headers?.host + req.originalUrl
     const liveRequest = {
         url: fullUrl,
         method: req.method,
@@ -106,26 +114,22 @@ export async function validateRequest(
         validateResult.runtimeException?.code == Constants.ErrorCodes.MultipleOperationsFound.name
     ) {
         const result = search(validator.operationSearcher, validationRequest)
-        // console.log("operation: ", result);
-        const operationId = result.operationMatch.operation.operationId as string
         const specItem = {
             content: result.operationMatch.operation
         }
         const example = await generate(specItem)
         if (profile?.alwayError) {
-            res.status(STATUS_CODE_404).json(createErrorBody(profile.alwayError, ERROR_INTENTIONAL))
+            res.set(profile.alwayError, ERROR_INTENTIONAL)
             return
         }
         genStatefulResponse(req, res, example.responses, profile)
     } else {
-        const exampleResponse = handleSpecials(req, res, validationRequest)
+        const exampleResponse = handleSpecials(req, validationRequest)
         if (exampleResponse == undefined) {
             if ((validateResult.errors?.length || 0) > 0) {
-                res.status(STATUS_CODE_404).json(
-                    createErrorBody(STATUS_CODE_404, JSON.stringify(validateResult.errors))
-                )
+                res.set(STATUS_CODE_404, JSON.stringify(validateResult.errors))
             } else {
-                res.status(STATUS_CODE_404).json(validateResult.runtimeException)
+                res.set(STATUS_CODE_404, JSON.stringify(validateResult.runtimeException))
             }
         } else {
             genStatefulResponse(req, res, exampleResponse, profile)
@@ -134,8 +138,7 @@ export async function validateRequest(
 }
 
 export function handleSpecials(
-    req: express.Request,
-    res: express.Response,
+    req: VirtualServerRequest,
     validationRequest: ValidationRequest
 ): Record<string, any> | undefined {
     if (validationRequest.providerNamespace == 'microsoft.unknown') {
@@ -172,8 +175,8 @@ export function handleSpecials(
 }
 
 export function genStatefulResponse(
-    req: express.Request,
-    res: express.Response,
+    req: VirtualServerRequest,
+    res: VirtualServerResponse,
     exampleResponses: Record<string, any>,
     profile: Record<string, any>
 ) {
@@ -183,7 +186,7 @@ export function genStatefulResponse(
         !ResourcePool.isListUrl(req) &&
         !resourcePool.hasUrl(req)
     ) {
-        res.status(STATUS_CODE_404).json(createErrorBody(STATUS_CODE_404, ERR_NOT_FOUND))
+        res.set(STATUS_CODE_404, ERR_NOT_FOUND)
     } else {
         resourcePool.updateResourcePool(req)
         const [code, _ret] = findResponse(exampleResponses, STATUS_CODE_200)
@@ -198,7 +201,7 @@ export function genStatefulResponse(
         if ([STATUS_CODE_200, STATUS_CODE_204].indexOf(code) < 0 && code < 300) {
             res.setHeader(
                 'Azure-AsyncOperation',
-                `${req.protocol}://${req.get('host')}${req.url}&${LRO_CALLBACK}=true`
+                `${req.protocol}://${req.headers?.host}${req.url}&${LRO_CALLBACK}=true`
             )
             res.setHeader('Retry-After', 1)
         }
@@ -212,7 +215,7 @@ export function genStatefulResponse(
             return typeof v === 'string'
         })
 
-        res.status(code).json(ret)
+        res.set(code, ret)
     }
 }
 

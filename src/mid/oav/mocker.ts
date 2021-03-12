@@ -1,4 +1,5 @@
 import * as mockjs from 'mockjs'
+import { logger } from '../../common/utils'
 export default class Mocker {
     public mock(paramSpec: any, paramName: string, arrItem?: any): any {
         switch (paramSpec.type) {
@@ -13,7 +14,7 @@ export default class Mocker {
             case 'array':
                 return this.generateArray(paramSpec, paramName, arrItem)
             default:
-                console.warn(`unknown type ${paramSpec.type}.`)
+                logger.warn(`unknown type ${paramSpec.type}.`)
         }
     }
 
@@ -28,7 +29,7 @@ export default class Mocker {
 
         if ('enum' in paramSpec) {
             if (paramSpec.enum.lengh > 0) {
-                console.error(`${paramName}'s enum can not be empty`)
+                logger.error(`${paramName}'s enum can not be empty`)
             }
             return paramSpec.enum[0]
         }
@@ -70,7 +71,7 @@ export default class Mocker {
                 data: new RegExp(pattern)
             })
             if ((minLength && data.length < minLength) || (maxLength && data.length > maxLength)) {
-                console.error(
+                logger.error(
                     `string ${paramName} has both regex pattern an length limit, no example can be generated. Set the length limit by regex and retry`
                 )
                 continue
@@ -134,7 +135,7 @@ export default class Mocker {
 
     private generateArray(paramSpec: any, paramName: any, arrItem: any) {
         if (!arrItem) {
-            console.warn(`array ${paramName} item is null, it may be caused by circular reference`)
+            logger.warn(`array ${paramName} item is null, it may be caused by circular reference`)
             return []
         }
         const minItems = 'minItems' in paramSpec ? paramSpec.minItems : 1
@@ -143,7 +144,7 @@ export default class Mocker {
 
         if (uniqueItems) {
             if (minItems > 1) {
-                console.error(
+                logger.error(
                     `array ${paramName} can not be mocked with both uniqueItems=true and minItems=${minItems}`
                 )
                 return []

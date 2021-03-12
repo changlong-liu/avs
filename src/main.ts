@@ -1,10 +1,10 @@
 import bodyParser = require('body-parser')
 import express = require('express')
+import { getHttpServer, getHttpsServer } from './webserver/httpServerConstructor'
+import { logger } from './common/utils'
 import { mockAuthServer } from './webserver/authserver'
 import { mockMetadataEndpints } from './webserver/metadata-endpoints'
 import { validateRequestAndMockResponse } from './webserver/validateRequestAndMockResponse'
-import { getHttpsServer, getHttpServer } from './webserver/httpServerConstructor'
-import { logger } from './common/utils'
 
 function logResponseBody(req: any, res: any, next: any) {
     const oldWrite = res.write

@@ -18,7 +18,8 @@
         "sourceType": "module"
     },
     "plugins": [
-        "@typescript-eslint"
+        "@typescript-eslint",
+        "sort-imports-es6-autofix"
     ],
     "rules": {
         "prefer-template": 0,
@@ -33,8 +34,23 @@
                 "jsx": "never",
                 "ts": "never",
                 "tsx": "never",
-                "json": "never" 
+                "json": "never"
             }
-        ]
+        ],
+        "sort-imports-es6-autofix/sort-imports-es6": [
+            2,
+            {
+                "ignoreCase": false,
+                "ignoreMemberSort": false,
+                "memberSyntaxSortOrder": [
+                    "none",
+                    "all",
+                    "multiple",
+                    "single"
+                ]
+            }
+        ],
+        "@typescript-eslint/no-explicit-any": 0,
+        "@typescript-eslint/explicit-module-boundary-types": 0
     }
 }

@@ -1,16 +1,17 @@
-import { JsonLoader } from 'oav/dist/lib/swagger/jsonLoader'
+import * as util from 'oav/dist/lib/generator/util'
 import {
-    buildItemOption,
     CacheItem,
+    MockerCache,
+    PayloadCache,
+    buildItemOption,
     createLeafItem,
     createTrunkItem,
-    MockerCache,
-    reBuildExample,
-    PayloadCache
+    reBuildExample
 } from 'oav/dist/lib/generator/exampleCache'
-import Mocker from './mocker'
-import * as util from 'oav/dist/lib/generator/util'
 import { ExampleRule, getRuleValidator } from 'oav/dist/lib/generator/exampleRule'
+import { JsonLoader } from 'oav/dist/lib/swagger/jsonLoader'
+import { logger } from '../../common/utils'
+import Mocker from './mocker'
 
 export default class SwaggerMocker {
     private jsonLoader: JsonLoader
@@ -194,7 +195,7 @@ export default class SwaggerMocker {
         discriminatorValue: string | undefined = undefined
     ) {
         if (!schema || typeof schema !== 'object') {
-            console.warn(`invalid schema.`)
+            logger.warn(`invalid schema.`)
             return undefined
         }
         // use visited set to avoid circular dependency
@@ -250,7 +251,7 @@ export default class SwaggerMocker {
             if ('additionalProperties' in definitionSpec && definitionSpec.additionalProperties) {
                 const newKey = util.randomKey()
                 if (newKey in properties) {
-                    console.error(`generate additionalProperties for ${objName} fail`)
+                    logger.error(`generate additionalProperties for ${objName} fail`)
                 } else {
                     example[newKey] = this.mockCachedObj(
                         newKey,

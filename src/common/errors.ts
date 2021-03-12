@@ -5,6 +5,7 @@ export const STATUS_CODE_500 = 500
 
 export const ERR_NOT_FOUND = 'Resource Not Found'
 export const ERROR_INTENTIONAL = 'Intentional Error'
+export const ERROR_UNKNOWN = 'Unknown Error'
 
 export function createErrorBody(code: any, msg: any) {
     return { error: { code: String(code), message: String(msg) } }

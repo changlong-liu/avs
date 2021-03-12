@@ -1,11 +1,11 @@
+import * as fs from 'fs'
 import * as path from 'path'
 import { JsonLoader } from 'oav/dist/lib/swagger/jsonLoader'
-import { Operation, SwaggerSpec } from 'oav/dist/lib/swagger/swaggerTypes'
-import SwaggerMocker from './oav/swaggerMocker'
 import { MockerCache, PayloadCache } from 'oav/dist/lib/generator/exampleCache'
+import { Operation, SwaggerSpec } from 'oav/dist/lib/swagger/swaggerTypes'
 import { isNullOrUndefined } from '../common/utils'
 import { specRepoDir } from '../common/config'
-import * as fs from 'fs'
+import SwaggerMocker from './oav/swaggerMocker'
 
 const jsonLoader = JsonLoader.create({})
 const mockerCache = new MockerCache()
