@@ -4,7 +4,6 @@ import { createErrorBody } from '../common/errors'
 
 export interface VirtualServerRequest extends LiveRequest {
     protocol: string
-    originalUrl: string
 }
 
 export class VirtualServerResponse implements LiveResponse {

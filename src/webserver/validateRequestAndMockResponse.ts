@@ -19,7 +19,6 @@ function createRequest(req: express.Request): VirtualServerRequest {
         query: req.query,
         url: req.url,
         protocol: req.protocol,
-        originalUrl: req.originalUrl,
         method: req.method,
         headers: req.headers,
         body: req.body
@@ -36,11 +35,7 @@ function createDefaultResponse(): VirtualServerResponse {
 export function validateRequestAndMockResponse(app: any | express.Express) {
     app.all('*', (req: express.Request, res: express.Response) => {
         logger.info(
-            `[HITTING] ${req.method} ${req.originalUrl} with body: ${JSON.stringify(
-                req.body,
-                null,
-                4
-            )}`
+            `[HITTING] ${req.method} ${req.url} with body: ${JSON.stringify(req.body, null, 4)}`
         )
         res.on('finish', () => {
             logger.info(`[RESPONSE] code: ${res.statusCode}`)

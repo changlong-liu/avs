@@ -93,7 +93,7 @@ export async function generateResponse(
     res: VirtualServerResponse,
     profile: Record<string, any>
 ): Promise<void> {
-    const fullUrl = req.protocol + '://' + req.headers?.host + req.originalUrl
+    const fullUrl = req.protocol + '://' + req.headers?.host + req.url
     const liveRequest = {
         url: fullUrl,
         method: req.method,
