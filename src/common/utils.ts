@@ -10,19 +10,14 @@ const myFormat = winston.format.printf(({ level, message, timestamp }) => {
 
 export const logger = winston.createLogger({
     level: 'info',
-    format: winston.format.combine(winston.format.timestamp(), myFormat),
-    transports: [
-        //
-        // - Write all logs with level `error` and below to `error.log`
-        // - Write all logs with level `info` and below to `combined.log`
-        //
-        new winston.transports.File({ filename: 'log/error.log', level: 'error' }),
-        new winston.transports.File({ filename: 'log/combined.log' })
-    ]
+    format: winston.format.combine(winston.format.timestamp(), myFormat)
 })
 
 if (process.env.NODE_ENV !== 'production') {
     logger.add(new winston.transports.Console({}))
+} else {
+    logger.add(new winston.transports.File({ filename: 'log/error.log', level: 'error' }))
+    logger.add(new winston.transports.File({ filename: 'log/combined.log' }))
 }
 
 export function isNullOrUndefined(obj: any) {

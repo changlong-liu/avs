@@ -129,6 +129,7 @@ export default class Mocker {
         return randomNumber + min
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     private generateBoolean(_paramSpec: any) {
         return true
     }

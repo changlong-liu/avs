@@ -7,7 +7,7 @@
     "debug": "tsc && node --max_old_space_size=4096 --inspect-brk ./dist/src/main.js",
     "start": "tsc && node dist/src/main.js",
     "build": "tsc",
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "npm run build && set NODE_ENV=development&&  jest --ci --reporters=default --reporters=jest-junit",
     "eslint-fix": "eslint . --ext .ts --ignore-pattern node_modules/ --ignore-pattern dist/ --fix",
     "eslint": "eslint . --ext .ts --ignore-pattern node_modules/ --ignore-pattern dist/ --quiet",
     "test-report": "npm run build && nyc mocha dist/test --recursive"

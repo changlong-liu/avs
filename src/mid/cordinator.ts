@@ -11,14 +11,14 @@ import {
 import { LiveValidator } from 'oav/dist/lib/liveValidation/liveValidator'
 import { OperationMatch, OperationSearcher } from 'oav/dist/lib/liveValidation/operationSearcher'
 import { ResourcePool } from './resource'
+import { SPEC_DIR, config } from '../../src/common/config'
 import { ValidationRequest } from 'oav/dist/lib/liveValidation/operationValidator'
 import { VirtualServerRequest, VirtualServerResponse } from './models'
 import { generate } from './responser'
 import { getPath, getPureUrl, logger, replacePropertyValue } from '../common/utils'
 import { get_locations } from './specials'
-import { specRepoDir } from '../common/config'
 
-const options = {
+export const defaultOavOptions = {
     swaggerPaths: [],
     excludedSwaggerPathsPattern: Constants.DefaultConfig.ExcludedSwaggerPathsPattern,
     git: {
@@ -26,24 +26,14 @@ const options = {
         shouldClone: false
     },
     // directory: path.resolve(os.homedir(), "repo"),
-    directory: specRepoDir
+    directory: config[SPEC_DIR]
 }
 
-export function InitializeValidator(
-    _options: any,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    callback = (v: LiveValidator): any => {
+export async function initializeValidator(validator: LiveValidator): Promise<void> {
+    return validator.initialize().then(() => {
         logger.info('validator initialized')
-    }
-): LiveValidator {
-    const ret = new LiveValidator(_options)
-    ;(async () => {
-        await ret.initialize()
-        callback(ret)
-    })()
-    return ret
+    })
 }
-const validator = InitializeValidator(options)
 
 function findResponse(responses: Record<string, any>, status: number): [any, any] {
     let nearest = undefined
@@ -89,6 +79,7 @@ function search(
 }
 
 export async function generateResponse(
+    validator: LiveValidator,
     req: VirtualServerRequest,
     res: VirtualServerResponse,
     profile: Record<string, any>
@@ -118,8 +109,8 @@ export async function generateResponse(
             content: result.operationMatch.operation
         }
         const example = await generate(specItem)
-        if (profile?.alwayError) {
-            res.set(profile.alwayError, ERROR_INTENTIONAL)
+        if (profile?.alwaysError) {
+            res.set(profile.alwaysError, ERROR_INTENTIONAL)
             return
         }
         genStatefulResponse(req, res, example.responses, profile)

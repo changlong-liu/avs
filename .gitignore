@@ -6,3 +6,4 @@ coverage/
 tools/metadata-tool/*.js
 *.pem
 *.log
+junit.xml

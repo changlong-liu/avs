@@ -1,17 +1,18 @@
 import * as express from 'express'
 import { ERROR_UNKNOWN, STATUS_CODE_500, createErrorBody } from '../common/errors'
+import { LiveValidator } from 'oav/dist/lib/liveValidation/liveValidator'
+import { PROFILES, config } from '../common/config'
 import { VirtualServerRequest, VirtualServerResponse } from '../mid/models'
-import { generateResponse } from '../mid/cordinator'
+import { defaultOavOptions, generateResponse, initializeValidator } from '../mid/cordinator'
 import { isNullOrUndefined, logger } from '../common/utils'
-import { profiles } from '../common/config'
 
 function getProfileByHost(host: string): Record<string, any> {
     if (isNullOrUndefined(host)) return {}
     const arr = host.split(':')
     let port = '443'
     if (arr.length > 1) port = arr[1]
-    if (isNullOrUndefined(profiles[port])) return {}
-    return profiles[port]
+    if (isNullOrUndefined(config[PROFILES][port])) return {}
+    return config[PROFILES][port]
 }
 
 function createRequest(req: express.Request): VirtualServerRequest {
@@ -32,6 +33,9 @@ function createDefaultResponse(): VirtualServerResponse {
     )
 }
 
+const validator: LiveValidator = new LiveValidator(defaultOavOptions)
+initializeValidator(validator)
+
 export function validateRequestAndMockResponse(app: any | express.Express) {
     app.all('*', (req: express.Request, res: express.Response) => {
         logger.info(
@@ -42,7 +46,12 @@ export function validateRequestAndMockResponse(app: any | express.Express) {
         })
 
         const response = createDefaultResponse()
-        generateResponse(createRequest(req), response, getProfileByHost(req.headers.host as string))
+        generateResponse(
+            validator,
+            createRequest(req),
+            response,
+            getProfileByHost(req.headers.host as string)
+        )
             .then(() => {
                 for (const name in response.headers) res.setHeader(name, response.headers[name])
                 res.status(parseInt(response.statusCode)).json(response.body)
