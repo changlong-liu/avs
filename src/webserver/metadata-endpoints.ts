@@ -1,5 +1,5 @@
 import * as express from 'express'
-import { logger } from '../common/utils'
+import { logger, setContentTypeAsJson } from '../common/utils'
 
 export function mockMetadataEndpints(app: any | express.Express) {
     app.get('/metadata/endpoints', (req: express.Request, res: express.Response) => {
@@ -21,7 +21,6 @@ export function mockMetadataEndpints(app: any | express.Express) {
             }
         }
 
-        res.writeHead(200, { 'content-type': 'application/json; charset=utf-8' })
-        res.end(JSON.stringify(ret))
+        setContentTypeAsJson(res).json(ret)
     })
 }

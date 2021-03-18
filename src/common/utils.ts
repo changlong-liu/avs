@@ -1,3 +1,4 @@
+import * as express from 'express'
 import * as lodash from 'lodash'
 import * as winston from 'winston'
 
@@ -74,4 +75,9 @@ export function mergeDeep(target: any, ...sources: any[]): any {
     }
 
     return mergeDeep(target, ...sources)
+}
+
+export function setContentTypeAsJson(res: express.Response): express.Response {
+    res.setHeader('content-type', 'application/json; charset=utf-8')
+    return res
 }

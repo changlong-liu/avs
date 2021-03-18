@@ -1,4 +1,5 @@
 import * as express from 'express'
+import { setContentTypeAsJson } from '../common/utils'
 
 function mockLogin(app: any | express.Express) {
     const jwt = {
@@ -11,8 +12,7 @@ function mockLogin(app: any | express.Express) {
         access_token: 'ss'
     }
     app.all('/*/oauth2/token', (req: express.Request, res: express.Response) => {
-        res.writeHead(200, { 'content-type': 'application/json; charset=utf-8' })
-        res.end(JSON.stringify(jwt))
+        setContentTypeAsJson(res).status(200).json(jwt)
     })
 }
 
@@ -67,8 +67,7 @@ function mockFingerPrint(app: any | express.Express) {
     app.get(
         '/common/.well-known/openid-configuration',
         (req: express.Request, res: express.Response) => {
-            res.writeHead(200, { 'content-type': 'application/json; charset=utf-8' })
-            res.end(JSON.stringify(result))
+            setContentTypeAsJson(res).status(200).json(result)
         }
     )
 }
@@ -78,8 +77,7 @@ function mockServiceDiscovery(app: any | express.Express) {
         tenant_discovery_endpoint: 'https://localhost/common/.well-known/openid-configuration'
     }
     app.get('/common/discovery/instance', (req: express.Request, res: express.Response) => {
-        res.writeHead(200, { 'content-type': 'application/json; charset=utf-8' })
-        res.end(JSON.stringify(result))
+        setContentTypeAsJson(res).status(200).json(result)
     })
 }
 
@@ -107,8 +105,7 @@ function mockGetSubscriptions(app: any | express.Express) {
         ]
     }
     app.all('/subscriptions', (req: express.Request, res: express.Response) => {
-        res.writeHead(200, { 'content-type': 'application/json; charset=utf-8' })
-        res.end(JSON.stringify(result))
+        setContentTypeAsJson(res).status(200).json(result)
     })
 }
 
@@ -162,8 +159,7 @@ function mockGraphService(app: any | express.Express) {
     }
     // host: graph.windows.net
     app.all('/*/servicePrincipals', (req: express.Request, res: express.Response) => {
-        res.writeHead(200, { 'content-type': 'application/json; charset=utf-8' })
-        res.end(JSON.stringify(result))
+        setContentTypeAsJson(res).status(200).json(result)
     })
 }
 
@@ -195,8 +191,7 @@ function mockProviderService(app: any | express.Express) {
     }
     // host: management.azure.com
     app.all('/subscriptions/*/providers', (req: express.Request, res: express.Response) => {
-        res.writeHead(200, { 'content-type': 'application/json; charset=utf-8' })
-        res.end(JSON.stringify(result))
+        setContentTypeAsJson(res).status(200).json(result)
     })
 }
 
