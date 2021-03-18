@@ -28,19 +28,15 @@ const storeAndCompare = (
     response: VirtualServerResponse,
     path: string
 ) => {
-    try {
-        const expected = lodash.cloneDeep(pair)
-        pair.liveResponse.statusCode = response.statusCode
-        pair.liveResponse.body = response.body
-        pair.liveResponse.headers = response.headers
+    const expected = lodash.cloneDeep(pair)
+    pair.liveResponse.statusCode = response.statusCode
+    pair.liveResponse.body = response.body
+    pair.liveResponse.headers = response.headers
 
-        const newFile = path + '.new'
-        fs.writeFileSync(newFile, JSON.stringify(pair, null, 2)) // save new response for trouble shooting
-        assert.deepStrictEqual(pair, expected)
-        fs.unlinkSync(newFile) // remove the new file if pass the assert
-    } catch (err) {
-        console.error(err)
-    }
+    const newFile = path + '.new'
+    fs.writeFileSync(newFile, JSON.stringify(pair, null, 2)) // save new response for trouble shooting
+    assert.deepStrictEqual(pair, expected)
+    fs.unlinkSync(newFile) // remove the new file if pass the assert
 }
 
 const specDir = path.join(__dirname, '../../test/testData/swaggers')
