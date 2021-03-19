@@ -15,13 +15,13 @@ import {
 import { ErrorCodes } from 'oav/dist/lib/util/constants'
 import { LiveRequest } from 'oav/dist/lib/liveValidation/operationValidator'
 import { LiveValidator, RequestResponsePair } from 'oav/dist/lib/liveValidation/liveValidator'
-import { PROFILES, SPEC_DIR, config, setConfig } from '../../src/common/config'
 import { VirtualServerRequest, VirtualServerResponse } from '../../src/mid/models'
 import {
     genStatefulResponse,
     generateResponse,
     initializeValidator
 } from '../../src/mid/cordinator'
+import { setRepoDir } from '../../src/common/config'
 
 const storeAndCompare = (
     pair: RequestResponsePair,
@@ -43,7 +43,7 @@ const specDir = path.join(__dirname, '../../test/testData/swaggers')
 const optionsForTest = {
     directory: specDir
 }
-setConfig(SPEC_DIR, specDir)
+setRepoDir(specDir)
 const statefulProfile = {
     stateful: true
 }

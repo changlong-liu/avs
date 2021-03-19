@@ -11,12 +11,12 @@ import {
 import { LiveValidator } from 'oav/dist/lib/liveValidation/liveValidator'
 import { OperationMatch, OperationSearcher } from 'oav/dist/lib/liveValidation/operationSearcher'
 import { ResourcePool } from './resource'
-import { SPEC_DIR, config } from '../../src/common/config'
 import { ValidationRequest } from 'oav/dist/lib/liveValidation/operationValidator'
 import { VirtualServerRequest, VirtualServerResponse } from './models'
 import { generate } from './responser'
 import { getPath, getPureUrl, logger, replacePropertyValue } from '../common/utils'
 import { get_locations } from './specials'
+import { specRepoDir } from '../../src/common/config'
 
 export const defaultOavOptions = {
     swaggerPaths: [],
@@ -26,7 +26,7 @@ export const defaultOavOptions = {
         shouldClone: false
     },
     // directory: path.resolve(os.homedir(), "repo"),
-    directory: config[SPEC_DIR]
+    directory: specRepoDir
 }
 
 export async function initializeValidator(validator: LiveValidator): Promise<void> {

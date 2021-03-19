@@ -3,8 +3,8 @@ import * as path from 'path'
 import { JsonLoader } from 'oav/dist/lib/swagger/jsonLoader'
 import { MockerCache, PayloadCache } from 'oav/dist/lib/generator/exampleCache'
 import { Operation, SwaggerSpec } from 'oav/dist/lib/swagger/swaggerTypes'
-import { SPEC_DIR, config } from '../../src/common/config'
 import { isNullOrUndefined } from '../common/utils'
+import { specRepoDir } from '../../src/common/config'
 import SwaggerMocker from './oav/swaggerMocker'
 
 const jsonLoader = JsonLoader.create({})
@@ -41,7 +41,7 @@ export class SpecItem {
 }
 
 export function getSpecFileByOperation(operation: Operation): string {
-    return path.join(config[SPEC_DIR], operation._path._spec._filePath)
+    return path.join(specRepoDir, operation._path._spec._filePath)
 }
 
 export function getFullSpecBySpecItem(operation: Operation) {

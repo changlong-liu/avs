@@ -1,18 +1,18 @@
 import * as express from 'express'
 import { ERROR_UNKNOWN, STATUS_CODE_500, createErrorBody } from '../common/errors'
 import { LiveValidator } from 'oav/dist/lib/liveValidation/liveValidator'
-import { PROFILES, config } from '../common/config'
 import { VirtualServerRequest, VirtualServerResponse } from '../mid/models'
 import { defaultOavOptions, generateResponse, initializeValidator } from '../mid/cordinator'
 import { isNullOrUndefined, logger } from '../common/utils'
+import { profiles } from '../common/config'
 
 function getProfileByHost(host: string): Record<string, any> {
     if (isNullOrUndefined(host)) return {}
     const arr = host.split(':')
     let port = '443'
     if (arr.length > 1) port = arr[1]
-    if (isNullOrUndefined(config[PROFILES][port])) return {}
-    return config[PROFILES][port]
+    if (isNullOrUndefined(profiles[port])) return {}
+    return profiles[port]
 }
 
 function createRequest(req: express.Request): VirtualServerRequest {
